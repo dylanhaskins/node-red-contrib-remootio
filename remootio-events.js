@@ -1,6 +1,6 @@
 module.exports = function(RED) {
     let RemootioDevice = require('remootio-api-client');
-    let garagedoor1;
+    let remootioDoor;
     let ipaddress;
     let apisecretkey;
     let apiauthkey;
@@ -22,10 +22,10 @@ module.exports = function(RED) {
 
     function RemootioStatusNode(config) {
         RED.nodes.createNode(this,config);
-        this.remootio = config.remootio;
+        // this.remootio = config.remootio;
 
-        console.log(ipaddress);
-        garagedoor1 = new RemootioDevice(
+        this.log(ipaddress);
+        remootioDoor = new RemootioDevice(
             ipaddress, //Device IP address
             apisecretkey, //API Secret Key
             apiauthkey, //API Auth Key
@@ -38,46 +38,46 @@ module.exports = function(RED) {
         
         );
 
-        garagedoor1.on('connecting',()=>{
+        remootioDoor.on('connecting',()=>{
             this.status({fill:"yellow",shape:"ring",text:"connecting"});
-            console.log('garage door 1 connecting ...')
+            this.warn('Remootio connecting ...')
         });
 
-        garagedoor1.on('connected',()=>{
-            console.log('garage door 1 connected')
+        remootioDoor.on('connected',()=>{
+            this.warn('Remootio connected')
             this.status({fill:"green",shape:"ring",text:"connected"});
-            garagedoor1.authenticate() //Authenticate the session (required)
+            remootioDoor.authenticate() //Authenticate the session (required)
         });
 
-        garagedoor1.on('authenticated',()=>{
-            console.log('garage door 1 session authenticated')
+        remootioDoor.on('authenticated',()=>{
+            this.warn('Remootio session authenticated')
             this.status({fill:"green",shape:"ring",text:"authenticated"});
             //From this point on actions (that require authentication) can be sent to Remootio
-            //garagedoor1.sendQuery()
-            //garagedoor1.sendTrigger()
-            //garagedoor1.sendOpen()
-            //garagedoor1.sendClose()
-            //garagedoor1.sendRestart()
+            //remootioDoor.sendQuery()
+            //remootioDoor.sendTrigger()
+            //remootioDoor.sendOpen()
+            //remootioDoor.sendClose()
+            //remootioDoor.sendRestart()
         });
 
-            garagedoor1.connect(true); 
+            remootioDoor.connect(true); 
 
         var node = this;
         node.status({});
 
-        garagedoor1.on('disconnect',()=>{
+        remootioDoor.on('disconnect',()=>{
             this.status({fill:"red",shape:"ring",text:"disconnected"});
-            console.log('garage door 1 disconnected')
+            this.warn('Remootio disconnected')
         });
 
-        garagedoor1.on('error',(err)=>{
+        remootioDoor.on('error',(err)=>{
             this.status({fill:"red",shape:"ring",text:"error"});
-            console.log('error',err)
+            this.error('error',err)
         });
 
-        garagedoor1.on('incomingmessage',(frame,decryptedPayload)=>{
+        remootioDoor.on('incomingmessage',(frame,decryptedPayload)=>{
             //log the incoming messages to the console
-            console.log('Incoming message: ',frame)
+            this.log('Incoming message: ',frame)
             if (decryptedPayload){
                 if (decryptedPayload.event && decryptedPayload.event.state) {
                     switch (decryptedPayload.event.state){
@@ -99,7 +99,7 @@ module.exports = function(RED) {
                             this.send(msg)
                     }
             }
-                //console.log('Decrypted payload: ',decryptedPayload)
+                //this.log('Decrypted payload: ',decryptedPayload)
             }
             //messages can be handled here:
             //use frame.type to determine the frame type
@@ -108,27 +108,120 @@ module.exports = function(RED) {
             //and if decryptedPayload.event!=undefined it's a log message e.g. gate status changed
         });
 
-        // garagedoor1.on('outgoingmessage',(frame, unencryptedPayload)=>{
-        //     console.log('Outgoing message: ',frame)
-        //     if (unencryptedPayload){
-        //         console.log('Unencrypted payload: ',unencryptedPayload)
-        //     }
-        // });
-
-        // garagedoor1.connect(true); 
-        //var msg = { payload:garagedoor1.isConnected() }
-        //this.send(msg);
+        remootioDoor.on('outgoingmessage',(frame, unencryptedPayload)=>{
+            this.log('Outgoing message: ',frame)
+            if (unencryptedPayload){
+                //this.log('Unencrypted payload: ',unencryptedPayload)
+            }
+        });
 
         this.on('close', function(removed, done) {
             if (removed) {
-
+                remootioDoor.disconnect();
             } else {
-                // This node is being restarted
+                remootioDoor.disconnect();
             }
             done();
         });
         
     }
     RED.nodes.registerType("events:remootio", RemootioStatusNode);
+
+    function RemootioSwitch(config) {
+        RED.nodes.createNode(this,config);
+        // this.remootio = config.remootio;
+
+        if (!remootioDoor){
+            remootioDoor = new RemootioDevice(
+                ipaddress, //Device IP address
+                apisecretkey, //API Secret Key
+                apiauthkey, //API Auth Key
+    
+            //Constructor arguments:
+            //The IP address of the device is available in the Remootio app once you set up Wi-Fi connectivity
+            //The API Secret Key of the device is available in the Remootio app once you enable API access
+            //The API Auth Key of the device is available in the Remootio app once you enable API access
+            //Optional parameter here is how often the RemootioDevice class will send PING frames to the device to keep the connection alive (defaults to 60 seconds)    
+            
+            );
+        }
+
+        remootioDoor.on('connecting',()=>{
+            this.status({fill:"yellow",shape:"ring",text:"connecting"});
+            this.warn('Remootio connecting ...')
+        });
+
+        remootioDoor.on('connected',()=>{
+            this.warn('Remootio connected')
+            this.status({fill:"green",shape:"ring",text:"connected"});
+            remootioDoor.authenticate() //Authenticate the session (required)
+        });
+
+        remootioDoor.on('authenticated',()=>{
+            this.warn('Remootio session authenticated')
+            this.status({fill:"green",shape:"ring",text:"authenticated"});
+            //From this point on actions (that require authentication) can be sent to Remootio
+            //remootioDoor.sendQuery()
+            //remootioDoor.sendTrigger()
+            //remootioDoor.sendOpen()
+            //remootioDoor.sendClose()
+            //remootioDoor.sendRestart()
+        });
+
+        var node = this;        
+
+        remootioDoor.on('disconnect',()=>{
+            this.status({fill:"red",shape:"ring",text:"disconnected"});
+            this.warn('Remootio disconnected')
+        });
+
+        remootioDoor.on('error',(err)=>{
+            this.status({fill:"red",shape:"ring",text:"error"});
+            this.error('error',err)
+        });
+
+        remootioDoor.on('outgoingmessage',(frame, unencryptedPayload)=>{
+            this.log('Outgoing message: ',frame)
+            if (unencryptedPayload){
+                //this.log('Unencrypted payload: ',unencryptedPayload)
+            }
+        });
+
+        this.on('input', function(msg, send, done) {
+            if (!remootioDoor.isConnected && !remootioDoor.isAuthenticated){
+                console.log("Remootio is not connected, connecting now");
+               
+                remootioDoor.connect(true); 
+            }
+            else {
+                console.log("Remootio is connected - " + remootioDoor.isAuthenticated);
+            }
+               
+                node.status({fill:"green",shape:"ring",text:"sent"});
+            
+        
+            // If an error is hit, report it to the runtime
+            // if (err) {
+            //     if (done) {
+            //         // Node-RED 1.0 compatible
+            //         done(err);
+            //     } else {
+            //         // Node-RED 0.x compatible
+            //         node.error(err, msg);
+            //     }
+            // }
+        });
+
+        this.on('close', function(removed, done) {
+            if (removed) {
+                remootioDoor.disconnect();
+            } else {
+                remootioDoor.disconnect();
+            }
+            done();
+        });
+        
+    }
+    RED.nodes.registerType("switch:remootio", RemootioSwitch);
 }
 

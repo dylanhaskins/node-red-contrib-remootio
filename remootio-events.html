@@ -78,3 +78,26 @@
 </dl>
 <p>You can find details about the state and type of these events <a href="https://github.com/remootio/remootio-api-documentation/blob/master/websocket_api_v3_specification.md#10-events-from-the-api">here</a></p>
 </script>
+
+<script type="text/html" data-template-name="switch:remootio">
+    <div class="form-row">
+        <label for="node-input-remootio"></label>
+        <input type="text" id="node-input-remootio">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('switch:remootio',{
+        category: 'remootio',
+        color:"#EB6E00",
+        defaults: {
+            remootio: {type:"credentials:remootio",required:true}
+        },
+        inputs: 1,
+        outputs: 2,
+        icon: "file.png",
+        label: function() {
+            return this.remootio.ipaddress;
+        }
+    });
+</script>
