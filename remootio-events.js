@@ -83,18 +83,18 @@ module.exports = function(RED) {
                     switch (decryptedPayload.event.state){
                         case "open" :
                             this.status({fill:"red",shape:"ring",text:"open"});
-                            var thePayload = {state: decryptedPayload.event.state, type: decryptedPayload.event.type};
+                            var thePayload = {state: decryptedPayload.event.state, type: decryptedPayload.event.type, fullevent: decryptedPayload.event};
                             var msg = { payload: thePayload}
                             this.send(msg);
                             break;
                         case "closed" :
-                            var thePayload = {state: decryptedPayload.event.state, type: decryptedPayload.event.type};
+                            var thePayload = {state: decryptedPayload.event.state, type: decryptedPayload.event.type, fullevent: decryptedPayload.event};
                             var msg = { payload: thePayload}
                             this.send(msg)
                             break;
                         default : 
                             this.status({fill:"yellow",shape:"ring",text:decryptedPayload.event.state});
-                            var thePayload = {state: decryptedPayload.event.state, type: decryptedPayload.event.type};
+                            var thePayload = {state: decryptedPayload.event.state, type: decryptedPayload.event.type, fullevent: decryptedPayload.event};
                             var msg = { payload: thePayload}
                             this.send(msg)
                     }
