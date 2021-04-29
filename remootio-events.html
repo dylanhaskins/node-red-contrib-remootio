@@ -1,0 +1,59 @@
+<script type="text/javascript">
+    RED.nodes.registerType('credentials:remootio',{
+        category: 'config',
+        color: '#EB6E00',
+        defaults: {
+            ipaddress: {value:""}
+        },
+        credentials: {
+            apisecretkey: {type:"password"},
+            apiauthkey: {type:"password"}
+         },
+        label: function() {
+            return this.ipaddress||"credentials:remootio";
+        },
+        exportable: false
+    });
+</script>
+
+<script type="text/html" data-template-name="credentials:remootio">
+    <div class="form-row">
+        <label for="node-input-ipaddress"><i class="fa fa-tag"></i> IP Address</label>
+        <input type="text" id="node-input-ipaddress">
+    </div>
+    <div class="form-row">
+        <label for="node-input-apisecretkey"><i class="fa fa-tag"></i> API Secret Key</label>
+        <input type="password" id="node-input-apisecretkey">
+    </div>
+    <div class="form-row">
+        <label for="node-input-apiauthkey"><i class="fa fa-tag"></i> API Auth Key</label>
+        <input type="password" id="node-input-apiauthkey">
+    </div>
+</script>
+
+<script type="text/html" data-template-name="events:remootio">
+    <div class="form-row">
+        <label for="node-input-remootio"></label>
+        <input type="text" id="node-input-remootio">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('events:remootio',{
+        category: 'function',
+        color:"#EB6E00",
+        defaults: {
+            remootio: {type:"credentials:remootio",required:true}
+        },
+        inputs: 0,
+        outputs: 1,
+        icon: "file.png",
+        label: function() {
+            return this.remootio;
+        }
+    });
+</script>
+
+<script type="text/html" data-help-name="events:remootio">
+    <p>A listener for Remootio events</p>
+</script>

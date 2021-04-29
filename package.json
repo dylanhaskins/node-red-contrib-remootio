@@ -1,0 +1,19 @@
+{
+  "name": "node-red-remootio",
+  "version": "1.0.0",
+  "description": "Node-RED Remootio Integration",
+  "main": "remootio-events.js",
+  "scripts": {
+    "test": "node remootio.js"
+  },
+  "author": "Dylan Haskins",
+  "license": "ISC",
+  "Dependencies": {
+    "remootio-api-client": "^2.0.3"
+  },
+  "node-red" : {
+    "nodes": {
+        "remootio": "remootio-events.js"
+    }
+}
+}
