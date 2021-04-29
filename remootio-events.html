@@ -1,3 +1,18 @@
+<script type="text/html" data-template-name="credentials:remootio">
+    <div class="form-row">
+        <label for="node-config-input-ipaddress"><i class="fa fa-tag"></i> IP Address</label>
+        <input type="text" id="node-config-input-ipaddress">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-apisecretkey"><i class="fa fa-tag"></i> API Secret Key</label>
+        <input type="password" id="node-config-input-apisecretkey">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-apiauthkey"><i class="fa fa-tag"></i> API Auth Key</label>
+        <input type="password" id="node-config-input-apiauthkey">
+    </div>
+</script>
+
 <script type="text/javascript">
     RED.nodes.registerType('credentials:remootio',{
         category: 'config',
@@ -16,21 +31,6 @@
     });
 </script>
 
-<script type="text/html" data-template-name="credentials:remootio">
-    <div class="form-row">
-        <label for="node-input-ipaddress"><i class="fa fa-tag"></i> IP Address</label>
-        <input type="text" id="node-input-ipaddress">
-    </div>
-    <div class="form-row">
-        <label for="node-input-apisecretkey"><i class="fa fa-tag"></i> API Secret Key</label>
-        <input type="password" id="node-input-apisecretkey">
-    </div>
-    <div class="form-row">
-        <label for="node-input-apiauthkey"><i class="fa fa-tag"></i> API Auth Key</label>
-        <input type="password" id="node-input-apiauthkey">
-    </div>
-</script>
-
 <script type="text/html" data-template-name="events:remootio">
     <div class="form-row">
         <label for="node-input-remootio"></label>
@@ -40,7 +40,7 @@
 
 <script type="text/javascript">
     RED.nodes.registerType('events:remootio',{
-        category: 'function',
+        category: 'remootio',
         color:"#EB6E00",
         defaults: {
             remootio: {type:"credentials:remootio",required:true}
@@ -49,11 +49,30 @@
         outputs: 1,
         icon: "file.png",
         label: function() {
-            return this.remootio;
+            return this.remootio.ipaddress;
         }
     });
 </script>
 
 <script type="text/html" data-help-name="events:remootio">
-    <p>A listener for Remootio events</p>
+    <p>Report status messages from a Remootio Device</p>
+    <h3>Config Properties</h3>
+    <p>You will need to enter configuration properties for the Remootio, you can find these under Settings -> Websocket API in the Remootio App</p>
+    <dl class="message-properties">
+        <dt>IP Address <span class="property-type">string</span></dt>
+        <dd>the IP address of your Remootio.</dd>
+        <dt>API Secret Key <span class="property-type">password</span></dt>
+        <dd>the API Secret Key of your Remootio.</dd>
+        <dt>API Auth Key<span class="property-type">password</span></dt>
+        <dd>the API Auth key of your Remootio.</dd>
+    </dl>
+    <h3>Details</h3>
+   <p>This node does provides a <code>msg.payload</code> object with the following properties.</p>
+   <dl class="message-properties">
+    <dt>payload.state<span class="property-type">string</span></dt>
+    <dd>the state of the Remootio device</dd>
+    <dt>payload.type<span class="property-type">string</span></dt>
+    <dd>the type of state event triggered</dd>
+</dl>
+<p>You can find details about the state and type of these events <a href="https://github.com/remootio/remootio-api-documentation/blob/master/websocket_api_v3_specification.md#10-events-from-the-api">here</a></p>
 </script>
