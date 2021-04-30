@@ -1,17 +1,25 @@
 {
   "name": "node-red-contrib-remootio",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Node-RED Remootio Integration",
+  "homepage": "https://www.dylanhaskins.com",
+  "author": {
+    "name": "Dylan Haskins",
+    "url": "https://github.com/dylanhaskins"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dylanhaskins/node-red-contrib-remootio.git"
+  },
   "main": "remootio.js",
   "scripts": {
     "test": "node remootio.js"
   },
-  "author": "Dylan Haskins",
   "license": "MIT",
   "Dependencies": {
     "remootio-api-client": "^2.0.3"
   },
-  "keywords": [ "node-red" ],
+  "keywords": [ "node-red", "remootio", "home automation", "home assistant" ],
   "node-red" : {
     "nodes": {
         "remootio": "remootio.js"
