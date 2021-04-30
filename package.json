@@ -19,6 +19,9 @@
   "devDependencies": {
     "remootio-api-client": "^2.0.3"
   },
+  "dependencies": {
+    "remootio-api-client": "^2.0.3"
+  },
   "keywords": [ "node-red", "remootio", "home automation", "home assistant" ],
   "node-red" : {
     "nodes": {
