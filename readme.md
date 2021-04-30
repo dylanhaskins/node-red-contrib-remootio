@@ -31,7 +31,7 @@ Takes a `credentials: remootio` input for authentication and connectivity to you
 
 #### Outputs
 
-When returning events it sets the `msg.payload.fullevent` to the remootio event, a full list is documented by
+When returning events it sets the `msg.payload.event` to the remootio event, a full list is documented by
 <a href="https://github.com/remootio/remootio-api-documentation/blob/master/websocket_api_v3_specification.md#10-events-from-the-api" target="_new">Remootio</a>.
 
 Sets `msg.payload.state` to the state of the event `open` or `closed`

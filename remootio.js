@@ -71,19 +71,19 @@ module.exports = function (RED) {
                     switch (decryptedPayload.event.state) {
                         case "open":
                             node.status({ fill: "red", shape: "ring", text: "open" });
-                            var thePayload = { state: decryptedPayload.event.state, type: decryptedPayload.event.type, fullevent: decryptedPayload };
+                            var thePayload = { state: decryptedPayload.event.state, type: decryptedPayload.event.type, event: decryptedPayload.event };
                             var msg = { payload: thePayload }
                             node.send(msg);
                             break;
                         case "closed":
                             node.status({ fill: "green", shape: "ring", text: "closed" });
-                            var thePayload = { state: decryptedPayload.event.state, type: decryptedPayload.event.type, fullevent: decryptedPayload };
+                            var thePayload = { state: decryptedPayload.event.state, type: decryptedPayload.event.type, event: decryptedPayload.event };
                             var msg = { payload: thePayload }
                             node.send(msg)
                             break;
                         default:
                             node.status({ fill: "yellow", shape: "ring", text: decryptedPayload.event.state });
-                            var thePayload = { state: decryptedPayload.event.state, type: decryptedPayload.event.type, fullevent: decryptedPayload };
+                            var thePayload = { state: decryptedPayload.event.state, type: decryptedPayload.event.type, event: decryptedPayload.event };
                             var msg = { payload: thePayload };
                             node.send(msg);
                     }
