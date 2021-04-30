@@ -16,7 +16,7 @@
     "test": "node remootio.js"
   },
   "license": "MIT",
-  "Dependencies": {
+  "devDependencies": {
     "remootio-api-client": "^2.0.3"
   },
   "keywords": [ "node-red", "remootio", "home automation", "home assistant" ],
