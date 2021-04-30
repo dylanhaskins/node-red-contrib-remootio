@@ -1,4 +1,4 @@
-<script type="text/html" data-template-name="credentials:remootio">
+<script type="text/html" data-template-name="credentials: remootio">
     <div class="form-row">
         <label for="node-config-input-ipaddress"><i class="fa fa-tag"></i> IP Address</label>
         <input type="text" id="node-config-input-ipaddress">
@@ -14,7 +14,7 @@
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('credentials:remootio',{
+    RED.nodes.registerType('credentials: remootio',{
         category: 'config',
         color: '#EB6E00',
         defaults: {
@@ -25,36 +25,36 @@
             apiauthkey: {type:"password"}
          },
         label: function() {
-            return this.ipaddress||"credentials:remootio";
+            return this.ipaddress||"credentials: remootio";
         },
         exportable: false
     });
 </script>
 
-<script type="text/html" data-template-name="events:remootio">
+<script type="text/html" data-template-name="events: remootio">
     <div class="form-row">
-        <label for="node-input-remootio"></label>
+        <label for="node-input-remootio">Remootio Connection</label>
         <input type="text" id="node-input-remootio">
     </div>
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('events:remootio',{
+    RED.nodes.registerType('events: remootio',{
         category: 'remootio',
         color:"#EB6E00",
         defaults: {
-            remootio: {type:"credentials:remootio",required:true}
+            remootio: {type:"credentials: remootio",required:true}
         },
         inputs: 0,
         outputs: 1,
         icon: "file.png",
         label: function() {
-            return this.remootio.ipaddress;
+            return this.ipaddress || "events: remootio" ;
         }
     });
 </script>
 
-<script type="text/html" data-help-name="events:remootio">
+<script type="text/html" data-help-name="events: remootio">
     <p>Report status messages from a Remootio Device</p>
     <h3>Config Properties</h3>
     <p>You will need to enter configuration properties for the Remootio, you can find these under Settings -> Websocket API in the Remootio App</p>
@@ -79,25 +79,36 @@
 <p>You can find details about the state and type of these events <a href="https://github.com/remootio/remootio-api-documentation/blob/master/websocket_api_v3_specification.md#10-events-from-the-api">here</a></p>
 </script>
 
-<script type="text/html" data-template-name="switch:remootio">
+<script type="text/html" data-template-name="switch: remootio">
     <div class="form-row">
-        <label for="node-input-remootio"></label>
+        <label for="node-input-remootio">Remootio Connection</label>
         <input type="text" id="node-input-remootio">
+        <label for="node-input-remootiocommand">Remootio Command</label>
+        <select name="command" id="node-input-remootiocommand">
+            <option value="sendPing">sendPing</option>
+            <option value="sendHello">sendHello</option>
+            <option value="sendQuery">sendQuery</option>
+            <option value="sendTrigger">sendTrigger</option>
+            <option value="sendOpen">sendOpen</option>
+            <option value="sendClose">sendClose</option>
+            <option value="sendRestart">sendRestart</option>
+          </select>
     </div>
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('switch:remootio',{
+    RED.nodes.registerType('switch: remootio',{
         category: 'remootio',
         color:"#EB6E00",
         defaults: {
-            remootio: {type:"credentials:remootio",required:true}
+            remootio: {type:"credentials: remootio",required:true},
+            remootiocommand : {value:"sendPing"}
         },
         inputs: 1,
-        outputs: 2,
+        outputs: 1,
         icon: "file.png",
         label: function() {
-            return this.remootio.ipaddress;
+            return this.remootiocommand;
         }
     });
 </script>
