@@ -2,7 +2,7 @@
   "name": "node-red-contrib-remootio",
   "version": "1.0.0",
   "description": "Node-RED Remootio Integration",
-  "main": "remootio-events.js",
+  "main": "remootio.js",
   "scripts": {
     "test": "node remootio.js"
   },
@@ -14,7 +14,7 @@
   "keywords": [ "node-red" ],
   "node-red" : {
     "nodes": {
-        "remootio": "remootio-events.js"
+        "remootio": "remootio.js"
     }
 }
 }
