@@ -33,6 +33,8 @@
 
 <script type="text/html" data-template-name="events: remootio">
     <div class="form-row">
+        <label for="node-input-remootioname">Name</label>
+        <input type="text" id="node-input-remootioname">
         <label for="node-input-remootio">Remootio Connection</label>
         <input type="text" id="node-input-remootio">
     </div>
@@ -43,13 +45,14 @@
         category: 'remootio',
         color: "#EB6E00",
         defaults: {
+            remootioname : {value : ""},
             remootio: { type: "credentials: remootio", required: true }
         },
         inputs: 0,
         outputs: 1,
         icon: "file.png",
         label: function () {
-            return this.ipaddress || "events: remootio";
+            return this.remootioname || "events: remootio";
         }
     });
 </script>
@@ -82,6 +85,9 @@
 
 <script type="text/html" data-template-name="switch: remootio">
     <div class="form-row">
+        <label for="node-input-remootioname">Name</label>
+        <input type="text" id="node-input-remootioname">
+        <br/>
         <label for="node-input-remootio">Remootio Connection</label>
         <input type="text" id="node-input-remootio">
         <label for="node-input-remootiocommand">Remootio Command</label>
@@ -130,6 +136,7 @@
         category: 'remootio',
         color: "#EB6E00",
         defaults: {
+            remootioname : {value : ""},
             remootio: { type: "credentials: remootio", required: true },
             remootiocommand: { value: "sendPing" }
         },
@@ -137,7 +144,13 @@
         outputs: 1,
         icon: "file.png",
         label: function () {
-            return this.remootiocommand;
+            if (this.remootioname) {
+                return this.remootioname + " - " + this.remootiocommand;
+            }
+            else {
+                return this.remootiocommand;
+            }
+            
         }
     });
 </script>
