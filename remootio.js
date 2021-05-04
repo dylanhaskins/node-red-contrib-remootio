@@ -2,17 +2,17 @@ module.exports = function (RED) {
     let RemootioDevice = require('remootio-api-client');
     let remootioStatus;
     let remootioSwitch;
-    let ipaddress;
-    let apisecretkey;
-    let apiauthkey;
+    // let ipaddress;
+    // let apisecretkey;
+    // let apiauthkey;
     let remootioCommand;
     let sharedWebSocket = false;
 
     function RemootioCredentialsNode(config) {
         RED.nodes.createNode(this, config);
-        ipaddress = config.ipaddress;
-        apisecretkey = this.credentials.apisecretkey;
-        apiauthkey = this.credentials.apiauthkey;
+        this.ipaddress = config.ipaddress;
+        this.apisecretkey = this.credentials.apisecretkey;
+        this.apiauthkey = this.credentials.apiauthkey;
 
     }
     RED.nodes.registerType("credentials: remootio", RemootioCredentialsNode, {
@@ -25,14 +25,15 @@ module.exports = function (RED) {
 
     function RemootioStatusNode(config) {
         RED.nodes.createNode(this, config);
+        this.remootioDevice = RED.nodes.getNode(config.remootio);
+
         var node = this;
         node.status({});
-
-        node.log(ipaddress);
+        
         remootioStatus = new RemootioDevice(
-            ipaddress, //Device IP address
-            apisecretkey, //API Secret Key
-            apiauthkey, //API Auth Key
+            node.remootioDevice.ipaddress, //Device IP address
+            node.remootioDevice.apisecretkey, //API Secret Key
+            node.remootioDevice.apiauthkey, //API Auth Key
 
             //Constructor arguments:
             //The IP address of the device is available in the Remootio app once you set up Wi-Fi connectivity
@@ -62,6 +63,7 @@ module.exports = function (RED) {
 
         remootioStatus.on('error', (err) => {
             node.status({ fill: "red", shape: "ring", text: "error" });
+            console.log(err);
             node.error('error', err)
         });
 
@@ -107,6 +109,7 @@ module.exports = function (RED) {
 
     function RemootioSwitch(config) {
         RED.nodes.createNode(this, config);
+        this.remootioDevice = RED.nodes.getNode(config.remootio);
         var node = this;
         node.status({});
 
@@ -114,9 +117,9 @@ module.exports = function (RED) {
         remootioCommand = node.remootiocommand;
         if (!remootioSwitch) {
             remootioSwitch = new RemootioDevice(
-                ipaddress, //Device IP address
-                apisecretkey, //API Secret Key
-                apiauthkey, //API Auth Key
+                node.remootioDevice.ipaddress, //Device IP address
+                node.remootioDevice.apisecretkey, //API Secret Key
+                node.remootioDevice.apiauthkey, //API Auth Key
             );
         }
 
