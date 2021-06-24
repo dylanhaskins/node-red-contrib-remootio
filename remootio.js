@@ -1,11 +1,7 @@
 module.exports = function (RED) {
     let RemootioDevice = require('remootio-api-client');
     let remootioStatus;
-    let remootioSwitch;
-    // let ipaddress;
-    // let apisecretkey;
-    // let apiauthkey;
-    let remootioCommand;
+    let remootioSwitch = null;
     let sharedWebSocket = false;
 
     function RemootioCredentialsNode(config) {
@@ -29,7 +25,7 @@ module.exports = function (RED) {
 
         var node = this;
         node.status({});
-        
+
         remootioStatus = new RemootioDevice(
             node.remootioDevice.ipaddress, //Device IP address
             node.remootioDevice.apisecretkey, //API Secret Key
@@ -45,11 +41,11 @@ module.exports = function (RED) {
 
         remootioStatus.on('connecting', () => {
             node.status({ fill: "yellow", shape: "ring", text: "connecting" });
-            node.warn('Remootio connecting ...')
+            node.log('Remootio connecting ...')
         });
 
         remootioStatus.on('connected', () => {
-            node.warn('Remootio connected')
+            node.log('Remootio connected')
             node.status({ fill: "green", shape: "ring", text: "connected" });
             remootioSwitch = remootioStatus;
             sharedWebSocket = true;
@@ -58,7 +54,9 @@ module.exports = function (RED) {
 
         remootioStatus.on('disconnect', () => {
             node.status({ fill: "red", shape: "ring", text: "disconnected" });
-            node.warn('Remootio disconnected')
+            remootioSwitch = null;
+            sharedWebSocket = false;
+            node.log('Remootio disconnected')
         });
 
         remootioStatus.on('error', (err) => {
@@ -109,63 +107,81 @@ module.exports = function (RED) {
 
     function RemootioSwitch(config) {
         RED.nodes.createNode(this, config);
-        this.remootioDevice = RED.nodes.getNode(config.remootio);
+        this.remootio = config.remootio
+        this.remootioDevice = RED.nodes.getNode(this.remootio);
+        this.command = config.remootiocommand
+        this.status({});
+
         var node = this;
-        node.status({});
-
-        node.remootiocommand = config.remootiocommand;
-        remootioCommand = node.remootiocommand;
-        if (!remootioSwitch) {
-            remootioSwitch = new RemootioDevice(
-                node.remootioDevice.ipaddress, //Device IP address
-                node.remootioDevice.apisecretkey, //API Secret Key
-                node.remootioDevice.apiauthkey, //API Auth Key
-            );
-        }
-
-        remootioSwitch.on('connecting', () => {
-            node.status({ fill: "yellow", shape: "ring", text: "connecting" });
-            node.warn('Remootio connecting ...')
-        });
-
-        remootioSwitch.on('connected', () => {
-            node.warn('Remootio connected')
-            node.status({ fill: "green", shape: "ring", text: "connected" });
-            remootioSwitch.authenticate() //Authenticate the session (required)
-        });
-
-        remootioSwitch.on('disconnect', () => {
-            node.warn('Remootio disconnected')
-        });
-
-        remootioSwitch.on('authenticated', () => {
-            node.warn('Remootio session authenticated');            
-            node.status({ fill: "green", shape: "ring", text: "authenticated" });
-            doRemootioCommand(node);
-            node.status({ fill: "green", shape: "ring", text: "sent" });
-        });
-
-        remootioSwitch.on('error', (err) => {
-            node.status({ fill: "red", shape: "ring", text: "error" });
-            node.error('error', err)
-            remootioSwitch.disconnect();
-        });
 
         node.on('input', function (msg, send, done) {
-            if (!remootioSwitch.isConnected && !remootioSwitch.isAuthenticated) {
-                remootioSwitch.connect();
+
+            if (remootioSwitch == null) {
+                node.remootioSwitch = new RemootioDevice(
+                    node.remootioDevice.ipaddress, //Device IP address
+                    node.remootioDevice.apisecretkey, //API Secret Key
+                    node.remootioDevice.apiauthkey, //API Auth Key
+                );
+                remootioSwitch = node.remootioSwitch
             }
             else {
-                doRemootioCommand(node);
+                node.remootioSwitch = remootioSwitch;
             }
+
+            if (!node.remootioSwitch.isConnected && !node.remootioSwitch.isAuthenticated) {
+                node.remootioSwitch.connect();
+            }
+            else {
+                doRemootioCommand(node, msg);
+            }
+
+            node.remootioSwitch.on('connecting', () => {
+                node.status({ fill: "yellow", shape: "ring", text: "connecting" });
+                node.log('Remootio connecting ...')
+            });
+
+            node.remootioSwitch.on('connected', () => {
+                node.log('Remootio connected')
+                node.status({ fill: "green", shape: "ring", text: "connected" });
+                remootioSwitch = node.remootioSwitch;
+                sharedWebSocket = true;
+                node.remootioSwitch.authenticate() //Authenticate the session (required)
+            });
+
+            node.remootioSwitch.on('disconnect', () => {
+                node.log('Remootio disconnected')
+                remootioSwitch = null;
+                sharedWebSocket = false;
+            });
+
+            node.remootioSwitch.on('authenticated', () => {
+                node.log('Remootio session authenticated');
+                node.status({ fill: "green", shape: "ring", text: "authenticated" });
+                doRemootioCommand(node, msg);
+                node.status({ fill: "green", shape: "ring", text: "sent" });
+            });
+
+            node.remootioSwitch.on('error', (err) => {
+                node.status({ fill: "red", shape: "ring", text: "error" });
+                node.error('error', err)
+                node.remootioSwitch.disconnect();
+            });
+
+            node.send(msg);
         });
 
         node.on('close', function (removed, done) {
             if (removed) {
+                if (node.remootioSwitch.isConnected()) {
+                    node.remootioSwitch.disconnect();
+                }
                 if (remootioSwitch.isConnected()) {
                     remootioSwitch.disconnect();
                 }
             } else {
+                if (node.remootioSwitch.isConnected()) {
+                    node.remootioSwitch.disconnect();
+                }
                 if (remootioSwitch.isConnected()) {
                     remootioSwitch.disconnect();
                 }
@@ -175,68 +191,52 @@ module.exports = function (RED) {
 
     }
 
-    function doRemootioCommand(node) {
-        switch (remootioCommand) {
+    function doRemootioCommand(node, msg) {
+        node.log(node.command)
+        switch (node.command) {
             case "sendPing":
-                remootioSwitch.sendPing();
-                node.warn('Remootio sendPing sent');
+                node.remootioSwitch.sendPing();
+                node.log('Remootio sendPing sent');
+                msg.topic = 'Remootio sendPing sent';
                 node.status({ fill: "green", shape: "ring", text: "sent" });
-                if (!sharedWebSocket) {
-                    remootioSwitch.disconnect();
-                }
                 break;
             case "sendOpen":
-                remootioSwitch.sendOpen();
-                node.warn('Remootio sendOpen sent');
+                node.remootioSwitch.sendOpen();
+                node.log('Remootio sendOpen sent');
+                msg.topic = 'Remootio sendOpen sent';
                 node.status({ fill: "green", shape: "ring", text: "sent" });
-                if (!sharedWebSocket) {
-                    remootioSwitch.disconnect();
-                }
                 break;
             case "sendClose":
-                remootioSwitch.sendClose();
-                node.warn('Remootio sendClose sent');
+                node.remootioSwitch.sendClose();
+                node.log('Remootio sendClose sent');
+                msg.topic = 'Remootio sendClose sent';
                 node.status({ fill: "green", shape: "ring", text: "sent" });
-                if (!sharedWebSocket) {
-                    remootioSwitch.disconnect();
-                }
                 break;
             case "sendHello":
-                remootioSwitch.sendHello();
-                node.warn('Remootio sendHello sent');
+                node.remootioSwitch.sendHello();
+                node.log('Remootio sendHello sent');
+                msg.topic = 'Remootio sendHello sent';
                 node.status({ fill: "green", shape: "ring", text: "sent" });
-                if (!sharedWebSocket) {
-                    remootioSwitch.disconnect();
-                }
                 break;
             case "sendQuery":
-                remootioSwitch.sendQuery();
-                node.warn('Remootio sendQuery sent');
+                node.remootioSwitch.sendQuery();
+                node.log('Remootio sendQuery sent');
+                msg.topic = 'Remootio sendQuery sent';
                 node.status({ fill: "green", shape: "ring", text: "sent" });
-                if (!sharedWebSocket) {
-                    remootioSwitch.disconnect();
-                }
                 break;
             case "sendTrigger":
-                remootioSwitch.sendTrigger();
-                node.warn('Remootio sendTrigger sent');
+                node.remootioSwitch.sendTrigger();
+                node.log('Remootio sendTrigger sent');
+                msg.topic = 'Remootio sendTrigger sent';
                 node.status({ fill: "green", shape: "ring", text: "sent" });
-                if (!sharedWebSocket) {
-                    remootioSwitch.disconnect();
-                }
                 break;
             case "sendRestart":
-                remootioSwitch.sendRestart();
-                node.warn('Remootio sendRestart sent');
+                node.remootioSwitch.sendRestart();
+                node.log('Remootio sendRestart sent');
+                msg.topic = 'Remootio sendRestart sent';
                 node.status({ fill: "green", shape: "ring", text: "sent" });
-                if (!sharedWebSocket) {
-                    remootioSwitch.disconnect();
-                }
                 break;
             default:
-                if (!sharedWebSocket) {
-                    remootioSwitch.disconnect();
-                }
         }
     }
     RED.nodes.registerType("switch: remootio", RemootioSwitch);
